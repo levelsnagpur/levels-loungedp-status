@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Levels Gaming Lounge (Dharampeth)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #ffffff;
+      text-align: center;
+      padding: 30px;
+    }
+    h1, h3 {
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 95%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background-color: #1e1e1e;
+      color: #ffffff;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 12px;
+      color: #ffffff;
+    }
+    th {
+      background-color: #333;
+    }
+    tr:nth-child(even) {
+      background-color: #2c2c2c;
+    }
+    .available {
+      background-color: #006400;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+    }
+    .occupied {
+      background-color: #8B0000;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Levels Gaming Lounge - Dharampeth</h1>
+<h3>Live Room and Game Status</h3>
+
+<table id="status-table">
+  <thead>
+    <tr>
+      <th>Section</th>
+      <th>Seating Capacity</th>
+      <th>Facilities</th>
+      <th>Next Available Time</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Content will be populated via JS -->
+  </tbody>
+</table>
+
+<script>
+  const sheetID = '1_BCmLbKa-Xfo9Y84gUDHDHdQtBo3PSREye1NVRvm3gA';
+  const sheetName = 'LEVELSDPSTATUS';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+  fetch(url)
+    .then(res => res.text())
+    .then(data => {
+      const json = JSON.parse(data.substr(47).slice(0, -2));
+      const table = document.getElementById('status-table').getElementsByTagName('tbody')[0];
+
+      json.table.rows.forEach(row => {
+        const tr = document.createElement('tr');
+        row.c.forEach((cell, index) => {
+          const td = document.createElement('td');
+          td.textContent = cell ? cell.v : '';
+          tr.appendChild(td);
+        });
+
+        // Determine availability from the "Next Available Time" column (assumed index 3)
+        const availability = row.c[3] && row.c[3].v ? 'occupied' : 'available';
+        const statusTd = document.createElement('td');
+        statusTd.className = availability;
+        statusTd.textContent = availability.charAt(0).toUpperCase() + availability.slice(1);
+        tr.appendChild(statusTd);
+
+        table.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      console.error('Error loading data:', err);
+      alert("Unable to load data. Please make sure the sheet is published and accessible.");
+    });
+</script>
+
+</body>
+</html>
